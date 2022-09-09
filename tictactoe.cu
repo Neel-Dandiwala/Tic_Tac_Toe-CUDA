@@ -8,6 +8,8 @@
 #include <stdlib.h>
 using namespace std;
 
+const int width = 3;
+
 int hor1[3] = {0, 1, 2};
 int hor2[3] = {3, 4, 5};
 int hor3[3] = {6, 7, 8};
@@ -19,19 +21,21 @@ int dia2[3] = {2, 4, 6};
 int* winningsets[8] = {hor1, hor2, hor3, ver1, ver2, ver3, dia1, dia2};
 
 
-char board[3][3] = {
+char board[width][width] = {
     {'1', '2', '3'},
     {'4', '5', '6'},
     {'7', '8', '9'}
 };
 
+int slots[width * width] = {0};
+
 int choice;
 int row, column;
 
-int player1[9] = {0};
-int player2[9] = {0};
+int player1[width * width] = {0};
+int player2[width * width] = {0};
 
-char turn = 'X';
+int turn = 1;
 
 bool game = true;
 bool draw = false;
@@ -49,46 +53,50 @@ void display_board(){
     cout << "\t\t       |       |       \n";
 }
 
-void selection(){
+void selection(int *player){
 
     cout << "\n Enter your choice: \n";
 
-    cin >> choice;
+    for(int i = 0; i < width * width; i++){
+        if(slots[i] == 0 && player[i] == 0){
+            choice = i;
+        }
+    }
 
     switch(choice) {
-        case 1: 
+        case 0: 
             row = 0;
             column = 0;
+            break;
+        case 1: 
+            row = 0;
+            column = 1;
             break;
         case 2: 
             row = 0;
-            column = 1;
+            column = 2;
             break;
         case 3: 
-            row = 0;
-            column = 2;
+            row = 1;
+            column = 0;
             break;
         case 4: 
             row = 1;
-            column = 0;
+            column = 1;
             break;
         case 5: 
             row = 1;
-            column = 1;
-            break;
-        case 6: 
-            row = 1;
             column = 2;
             break;
-        case 7: 
+        case 6: 
             row = 2;
             column = 0;
             break;
-        case 8: 
+        case 7: 
             row = 2;
             column = 1;
             break;
-        case 9: 
+        case 8: 
             row = 2;
             column = 2;
             break;
@@ -98,56 +106,76 @@ void selection(){
 
 }
 
-void validation(int *player, int num){
+bool validation(int *player){
     cout << "\n Validation \n"; 
     for(auto v : winningsets){
         if(player[v[0]] == 1 && player[v[1]] == 1 && player[v[2]] == 1) {
-            cout << "\n PLAYER " << num << " WONNNN \n";
-            game = false;
-            display_board();
+            cout << "\n PLAYER " << " WONNNN \n";
+             // game = false;
+             // display_board();
+            return true;
         }
     }
 
+    return false;
+
+}
+
+void check_slot(int* player, char sym){
+    if(slots[width * row + column] == 0){
+        board[row][column] = sym;
+        slots[width * row + column] = 1;
+        player[width * row + column] = 1;
+        for (int i = 0; i < width * width; i++){
+            cout << player[i] << "   ";
+            
+        }
+        
+         // validation(player);
+        turn = !turn;
+    } else {
+        cout << "\n Slot is already filled! Invalid Move! Try again\n";
+        selection(player);
+        check_slot(player, sym);
+    }
 }
 
 void player_turn(){
-    if (turn == 'X'){
+    if (turn == 1){
         cout << "\n Player 1 [X] play : \n";
-    }
-    else if (turn == 'O'){
-        cout << "\n PLayer 2 [O] play:  \n";
-    }
+        selection(player1);
+        check_slot(player1, 'X');
 
-    selection();
-    if(turn == 'X' && board[row][column] != 'X' && board[row][column] != 'O'){
-        board[row][column] = 'X';
-        player1[choice - 1] = 1;
-        for (int i = 0; i < sizeof(player1) / sizeof(int); i++){
-            cout << player1[i] << "   ";
-        }
-        validation(player1, 1);
-        turn = 'O';
-    } else if (turn == 'O' && board[row][column] != 'X' && board[row][column] != 'O'){
-        board[row][column] = 'O';
-        player2[choice - 1] = 1;
-        for (int i = 0; i < sizeof(player2) / sizeof(int); i++){
-            cout << player2[i] << "   ";
-        }
-        validation(player2, 2);
-        turn = 'X';
-    } else {
-        cout << "\n Slot is already filled! Invalid Move! Try again\n";
-        selection();
+    }
+    else if (turn == 0){
+        cout << "\n PLayer 2 [O] play:  \n";
+        selection(player2);
+        check_slot(player2, 'O');
+            
     }
 }
 
+int score(int* slots) {
+    if(turn == 1){
+        if(validation(player1)){
+            return 10;
+        } else if(validation(player2)) {
+            return -10;
+        }
+    }
+    if(turn == 0){
+        if(validation(player2)){
+            return 10;
+        } else if(validation(player1)) {
+            return -10;
+        }
+    } 
+
+    return 0;
+}
 
 int main(){
     cout << "\t\t\t TIC TAC TOE \t\t\t";
-    
-for(int i = 0; i < 8; i++){
-    cout << winningsets[i][1] <<"\n ";
-}
 
 
     while(game == true){
