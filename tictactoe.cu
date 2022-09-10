@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <bits/stdc++.h>
 using namespace std;
 
 const int width = 3;
@@ -53,15 +54,30 @@ void display_board(){
     cout << "\t\t       |       |       \n";
 }
 
-void selection(int *player){
+int scenario(int *player, int* opponent){
+    int sample_slots[width * width] = {slots};
+    int sample_player[width * width] = {player};
+    int sample_opponent[width * width] = {opponent};
 
-    cout << "\n Enter your choice: \n";
+    int position;
+    int max_score = INT_MIN;
+    int temp;
 
     for(int i = 0; i < width * width; i++){
-        if(slots[i] == 0 && player[i] == 0){
-            choice = i;
+        if(sample_slots[i] == 0){
+            temp = check_scenario(i, sample_slots, sample_player, sample_opponent);
+        }
+        if(temp > max_score){
+                max_score = temp;
+                position = i;
         }
     }
+
+    return position;
+}
+
+void selection(){
+    cout << "\n The choice: " << choice << "\n";
 
     switch(choice) {
         case 0: 
@@ -102,12 +118,14 @@ void selection(int *player){
             break;
         default:
             cout << "\n Invalid Move \n";
+            break;
     }
 
 }
 
 bool validation(int *player){
     cout << "\n Validation \n"; 
+
     for(auto v : winningsets){
         if(player[v[0]] == 1 && player[v[1]] == 1 && player[v[2]] == 1) {
             cout << "\n PLAYER " << " WONNNN \n";
@@ -121,55 +139,54 @@ bool validation(int *player){
 
 }
 
-void check_slot(int* player, char sym){
-    if(slots[width * row + column] == 0){
+int check_scenario(int i, int* given_slots, int* player, int* opponent){
+    if(given_slots[i] == 0){
+        given_slots[i] = 1;
+        player[i] = 1;
+        return score(player, opponent);
+    } else {
+        cout << "\n Slot is already filled! Invalid Move! Try again\n";
+        selection(player);
+        check_scenario(given_slots, player, opponent);
+    }
+}
+
+void check_slot(int* given_slots, int* player, char sym){
+    if(given_slots[width * row + column] == 0){
         board[row][column] = sym;
-        slots[width * row + column] = 1;
+        given_slots[width * row + column] = 1;
         player[width * row + column] = 1;
-        for (int i = 0; i < width * width; i++){
-            cout << player[i] << "   ";
-            
-        }
-        
-         // validation(player);
+        validation(player);
         turn = !turn;
     } else {
         cout << "\n Slot is already filled! Invalid Move! Try again\n";
         selection(player);
-        check_slot(player, sym);
+        check_slot(given_slots, player, sym);
     }
 }
 
 void player_turn(){
     if (turn == 1){
         cout << "\n Player 1 [X] play : \n";
-        selection(player1);
-        check_slot(player1, 'X');
-
+        choice = scenario(player1, player2);
+        selection();
+        check_slot(slots, player1, 'X');
     }
     else if (turn == 0){
         cout << "\n PLayer 2 [O] play:  \n";
-        selection(player2);
-        check_slot(player2, 'O');
+        choice = scenario(player2, player1);
+        selection();
+        check_slot(slots, player2, 'O');
             
     }
 }
 
-int score(int* slots) {
-    if(turn == 1){
-        if(validation(player1)){
-            return 10;
-        } else if(validation(player2)) {
-            return -10;
-        }
+int score(int* player, int* opponent) {
+    if(validation(player)){
+        return 10;
+    } else if(validation(opponent)) {
+        return -10;
     }
-    if(turn == 0){
-        if(validation(player2)){
-            return 10;
-        } else if(validation(player1)) {
-            return -10;
-        }
-    } 
 
     return 0;
 }
@@ -177,8 +194,8 @@ int score(int* slots) {
 int main(){
     cout << "\t\t\t TIC TAC TOE \t\t\t";
 
-
-    while(game == true){
+    // while(game == true){
+    for(int i = 0; i < 9; i++){
         display_board();
         player_turn();
     }
