@@ -131,49 +131,42 @@ bool validation(int *player, bool winning_move){
 }
 
 
-int score(int* player, int* opponent) {
+int score(int depth, int* player, int* opponent) {
     if(validation(player, false)){
-        return 10;
+        return 10 - depth;
     } else if(validation(opponent, false)) {
-        return -10;
+        return depth - 10;
     }
 
     return 0;
 }
 
-int check_scenario(int i, int* given_slots, int* player, int* opponent){
+int check_scenario(int i, int depth, int* given_slots, int* player, int* opponent){
         given_slots[i] = 1;
         player[i] = 1;
         int max_score = INT_MIN;
-        int temp = -10;
-        bool toggle_turn = true;
-        if(score(player, opponent) == 0){
+        int temp;
+        //bool toggle_turn = true;
+        if(score(depth, player, opponent) == 0){
+            depth += 1;
             for(int i = 0; i < width * width; i++){
                 if(given_slots[i] == 0){
-                    if(toggle_turn){
-                        for(int j = 0; j < width * width; j++){
-                            if(given_slots[j] == 0){
-                                given_slots[j] = 1;
-                                opponent[j] = 1;
-                                temp = check_scenario(j, given_slots, player, opponent);
-                            }
-                        }
-                        toggle_turn = false;
-                    } else {
-                        temp = check_scenario(i, given_slots, player, opponent);
-                        toggle_turn = true;
+                    given_slots[i] = 1;
+                    opponent[i] = 1;  
+                    for(int j = i; j < width * width; j++){
+                        temp = check_scenario(j, depth, given_slots, player, opponent); 
+                    } 
+                    cout << "\n TEMPPP: " << temp << "\n";
+
+                    if(temp > max_score){
+                        max_score = temp;
                     }
-                    
                 }
 
-                if(temp > max_score){
-                    max_score = temp;
-                }
             }
-           // cout << "\n Inner Score: " << max_score << "\n";
             return max_score;
         }
-        return score(player, opponent);
+        return score(depth, player, opponent);
    
 }
 
@@ -202,19 +195,20 @@ int scenario(int *current_slots, int *player, int* opponent){
     int position;
     int max_score = INT_MIN;
     int temp = -10;
+    int depth = 0;
 
     for(int i = 0; i < width * width; i++){
         if(sample_slots[i] == 0){
-            temp = check_scenario(i, sample_slots, sample_player, sample_opponent);
-            // cout << "\n CHECK SCENARIO: " << temp << "\n";
-        }
-        if(temp > max_score){
+            temp = check_scenario(i, depth, sample_slots, sample_player, sample_opponent);
+            cout << "\n CHECK SCENARIO: " << temp << "\n";
+            if(temp > max_score){
                 max_score = temp;
                 position = i;
+            }
         }
     }
 
-    // cout << "\nMAX SCORE: " << max_score <<" & POSITION: " << position <<endl;
+    cout << "\nMAX SCORE: " << max_score <<" & POSITION: " << position <<endl;
 
     return position;
 }
@@ -240,8 +234,8 @@ void player_turn(){
 int main(){
     cout << "\t\t\t TIC TAC TOE \t\t\t";
 
-    while(game == true){
-    //for(int i = 0; i < 9; i++){
+    // while(game == true){
+    for(int i = 0; i < 9; i++){
         display_board();
         player_turn();
     }
