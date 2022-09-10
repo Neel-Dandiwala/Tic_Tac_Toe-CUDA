@@ -111,7 +111,7 @@ void selection(){
 }
 
 bool validation(int *player, bool winning_move){
-    cout << "\n Validation \n"; 
+    // cout << "\n Validation \n"; 
 
     for(auto v : winningsets){
         if(player[v[0]] == 1 && player[v[1]] == 1 && player[v[2]] == 1) {
@@ -146,17 +146,31 @@ int check_scenario(int i, int* given_slots, int* player, int* opponent){
         player[i] = 1;
         int max_score = INT_MIN;
         int temp = -10;
+        bool toggle_turn = true;
         if(score(player, opponent) == 0){
             for(int i = 0; i < width * width; i++){
                 if(given_slots[i] == 0){
-                    temp = check_scenario(i, given_slots, player, opponent);
+                    if(toggle_turn){
+                        for(int j = 0; j < width * width; j++){
+                            if(given_slots[j] == 0){
+                                given_slots[j] = 1;
+                                opponent[j] = 1;
+                                temp = check_scenario(j, given_slots, player, opponent);
+                            }
+                        }
+                        toggle_turn = false;
+                    } else {
+                        temp = check_scenario(i, given_slots, player, opponent);
+                        toggle_turn = true;
+                    }
+                    
                 }
 
                 if(temp > max_score){
                     max_score = temp;
                 }
             }
-
+           // cout << "\n Inner Score: " << max_score << "\n";
             return max_score;
         }
         return score(player, opponent);
@@ -192,7 +206,7 @@ int scenario(int *current_slots, int *player, int* opponent){
     for(int i = 0; i < width * width; i++){
         if(sample_slots[i] == 0){
             temp = check_scenario(i, sample_slots, sample_player, sample_opponent);
-            cout << "\n CHECK SCENARIO: " << temp << "\n";
+            // cout << "\n CHECK SCENARIO: " << temp << "\n";
         }
         if(temp > max_score){
                 max_score = temp;
@@ -200,7 +214,7 @@ int scenario(int *current_slots, int *player, int* opponent){
         }
     }
 
-    cout << "\nMAX SCORE: " << max_score <<" & POSITION: " << position <<endl;
+    // cout << "\nMAX SCORE: " << max_score <<" & POSITION: " << position <<endl;
 
     return position;
 }
