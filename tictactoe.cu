@@ -39,6 +39,7 @@ int player2[width * width] = {0};
 
 int turn = 1;
 
+bool winning_move = false;
 bool game = true;
 bool draw = false;
 
@@ -109,27 +110,31 @@ void selection(){
 
 }
 
-bool validation(int *player){
+bool validation(int *player, bool winning_move){
     cout << "\n Validation \n"; 
 
     for(auto v : winningsets){
         if(player[v[0]] == 1 && player[v[1]] == 1 && player[v[2]] == 1) {
-            cout << "\n PLAYER " << " WONNNN \n";
-             // game = false;
-             // display_board();
+            if(winning_move)
+            {
+                cout << "\n PLAYER " << " WONNNN \n";
+                game = false;
+                display_board();
+            }
             return true;
         }
     }
 
+    winning_move = false;
     return false;
 
 }
 
 
 int score(int* player, int* opponent) {
-    if(validation(player)){
+    if(validation(player, false)){
         return 10;
-    } else if(validation(opponent)) {
+    } else if(validation(opponent, false)) {
         return -10;
     }
 
@@ -137,14 +142,25 @@ int score(int* player, int* opponent) {
 }
 
 int check_scenario(int i, int* given_slots, int* player, int* opponent){
-    if(given_slots[i] == 0){
         given_slots[i] = 1;
         player[i] = 1;
+        int max_score = INT_MIN;
+        int temp = -10;
+        if(score(player, opponent) == 0){
+            for(int i = 0; i < width * width; i++){
+                if(given_slots[i] == 0){
+                    temp = check_scenario(i, given_slots, player, opponent);
+                }
+
+                if(temp > max_score){
+                    max_score = temp;
+                }
+            }
+
+            return max_score;
+        }
         return score(player, opponent);
-    } else {
-        cout << "\n Slot is already filled! Invalid Move! Try again\n";
-        return INT_MIN;
-    }
+   
 }
 
 void check_slot(int* given_slots, int* player, char sym){
@@ -152,18 +168,18 @@ void check_slot(int* given_slots, int* player, char sym){
         board[row][column] = sym;
         given_slots[width * row + column] = 1;
         player[width * row + column] = 1;
-        validation(player);
+        validation(player, true);
         turn = !turn;
+        return;
     } else {
         cout << "\n Slot is already filled! Invalid Move! Try again\n";
-        selection();
-        check_slot(given_slots, player, sym);
+        turn = 1;
     }
 }
 
-int scenario(int *player, int* opponent){
+int scenario(int *current_slots, int *player, int* opponent){
     int sample_slots[width * width];
-    copy_array(sample_slots, slots);
+    copy_array(sample_slots, current_slots);
     int sample_player[width * width];
     copy_array(sample_player, player);
     int sample_opponent[width * width];
@@ -171,11 +187,12 @@ int scenario(int *player, int* opponent){
 
     int position;
     int max_score = INT_MIN;
-    int temp;
+    int temp = -10;
 
     for(int i = 0; i < width * width; i++){
         if(sample_slots[i] == 0){
             temp = check_scenario(i, sample_slots, sample_player, sample_opponent);
+            cout << "\n CHECK SCENARIO: " << temp << "\n";
         }
         if(temp > max_score){
                 max_score = temp;
@@ -183,19 +200,21 @@ int scenario(int *player, int* opponent){
         }
     }
 
+    cout << "\nMAX SCORE: " << max_score <<" & POSITION: " << position <<endl;
+
     return position;
 }
 
 void player_turn(){
     if (turn == 1){
         cout << "\n Player 1 [X] play : \n";
-        choice = scenario(player1, player2);
+        choice = scenario(slots, player1, player2);
         selection();
         check_slot(slots, player1, 'X');
     }
     else if (turn == 0){
         cout << "\n PLayer 2 [O] play:  \n";
-        choice = scenario(player2, player1);
+        choice = scenario(slots, player2, player1);
         selection();
         check_slot(slots, player2, 'O');
             
@@ -207,8 +226,8 @@ void player_turn(){
 int main(){
     cout << "\t\t\t TIC TAC TOE \t\t\t";
 
-    // while(game == true){
-    for(int i = 0; i < 9; i++){
+    while(game == true){
+    //for(int i = 0; i < 9; i++){
         display_board();
         player_turn();
     }
