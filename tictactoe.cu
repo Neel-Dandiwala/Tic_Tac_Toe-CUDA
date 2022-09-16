@@ -1,6 +1,6 @@
 /**
-*
-*
+* Author: Neel Dandiwala
+* Date: September 2022
 *
 **/
 
@@ -26,15 +26,17 @@ int* winningsets[8] = {hor1, hor2, hor3, ver1, ver2, ver3, dia1, dia2};
 char board[width][width] = {
     {'1', '2', '3'},
     {'4', '5', '6'},
-    {'7', '8', '9'}
+    {'7', '8', 'X'}
 };
 
-int slots[width * width] = {0};
+// int slots[width * width] = {0};
+int slots[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
+int player1[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
 
 int choice;
 int row, column;
 
-int player1[width * width] = {0};
+// int player1[width * width] = {0};
 int player2[width * width] = {0};
 
 int turn = 1;
@@ -149,20 +151,28 @@ int check_scenario(int i, int depth, int* given_slots, int* player, int* opponen
         //bool toggle_turn = true;
         if(score(depth, player, opponent) == 0){
             depth += 1;
+            set<int> s;
+            set<int>::iterator it;
             for(int i = 0; i < width * width; i++){
                 if(given_slots[i] == 0){
                     given_slots[i] = 1;
                     opponent[i] = 1;  
-                    for(int j = i; j < width * width; j++){
-                        temp = check_scenario(j, depth, given_slots, player, opponent); 
+                    for(int j = 0; j < width * width; j++){
+                        if (given_slots[j] == 0){
+                            temp = check_scenario(j, depth, given_slots, player, opponent); 
+                            s.insert(temp);
+                        }
                     } 
                     cout << "\n TEMPPP: " << temp << "\n";
 
-                    if(temp > max_score){
-                        max_score = temp;
-                    }
                 }
 
+            }
+
+            for(auto it : s){
+                if(it >= max_score){
+                    max_score = it;
+                }
             }
             return max_score;
         }
@@ -194,17 +204,30 @@ int scenario(int *current_slots, int *player, int* opponent){
 
     int position;
     int max_score = INT_MIN;
-    int temp = -10;
+    int temp;
+    map<int, int> m;
+    map<int, int>::iterator iter;
     int depth = 0;
-
-    for(int i = 0; i < width * width; i++){
-        if(sample_slots[i] == 0){
-            temp = check_scenario(i, depth, sample_slots, sample_player, sample_opponent);
+    int index = 0;
+    while(index < width * width){
+        if(sample_slots[index] == 0){
+            temp = check_scenario(index, depth, sample_slots, sample_player, sample_opponent);
             cout << "\n CHECK SCENARIO: " << temp << "\n";
-            if(temp > max_score){
-                max_score = temp;
-                position = i;
+            m.insert(pair<int, int>(index, temp));
+            for(iter=m.begin(); iter!=m.end(); iter++){
+                cout << "\nKEY: " << iter->first << "  AND SCORE: " << iter->second << "\n";
             }
+        } 
+        index += 1;
+    }
+
+
+    for(iter=m.begin(); iter!=m.end(); iter++){
+        cout << "\nKEY: " << iter->first << "  AND SCORE: " << iter->second << "\n";
+        if(iter->second >= max_score){
+            
+            max_score = iter->second;
+            position = iter->first;
         }
     }
 
@@ -235,7 +258,7 @@ int main(){
     cout << "\t\t\t TIC TAC TOE \t\t\t";
 
     // while(game == true){
-    for(int i = 0; i < 9; i++){
+    for(int i = 0; i < 3; i++){
         display_board();
         player_turn();
     }
