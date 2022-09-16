@@ -26,12 +26,12 @@ int* winningsets[8] = {hor1, hor2, hor3, ver1, ver2, ver3, dia1, dia2};
 char board[width][width] = {
     {'1', '2', '3'},
     {'4', '5', '6'},
-    {'7', '8', 'X'}
+    {'7', '8', '9'}
 };
 
 // int slots[width * width] = {0};
-int slots[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
-int player1[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 1};
+int slots[width * width] = {1, 0, 0, 0, 0, 0, 0, 0, 0};
+int player1[width * width] = {1, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int choice;
 int row, column;
@@ -209,21 +209,17 @@ int scenario(int *current_slots, int *player, int* opponent){
     map<int, int>::iterator iter;
     int depth = 0;
     int index = 0;
-    while(index < width * width){
-        if(sample_slots[index] == 0){
+    int threshold = (width * width);
+    while(index < threshold){
+        if(current_slots[index] == 0){
             temp = check_scenario(index, depth, sample_slots, sample_player, sample_opponent);
-            cout << "\n CHECK SCENARIO: " << temp << "\n";
             m.insert(pair<int, int>(index, temp));
-            for(iter=m.begin(); iter!=m.end(); iter++){
-                cout << "\nKEY: " << iter->first << "  AND SCORE: " << iter->second << "\n";
-            }
         } 
         index += 1;
     }
 
 
     for(iter=m.begin(); iter!=m.end(); iter++){
-        cout << "\nKEY: " << iter->first << "  AND SCORE: " << iter->second << "\n";
         if(iter->second >= max_score){
             
             max_score = iter->second;
@@ -257,8 +253,8 @@ void player_turn(){
 int main(){
     cout << "\t\t\t TIC TAC TOE \t\t\t";
 
-    // while(game == true){
-    for(int i = 0; i < 3; i++){
+    while(game == true){
+    //for(int i = 0; i < 9; i++){
         display_board();
         player_turn();
     }
