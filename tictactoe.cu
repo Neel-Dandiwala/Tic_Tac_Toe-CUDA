@@ -30,8 +30,8 @@ char board[width][width] = {
 };
 
 // int slots[width * width] = {0};
-int slots[width * width] = {1, 0, 0, 0, 0, 0, 0, 0, 0};
-int player1[width * width] = {1, 0, 0, 0, 0, 0, 0, 0, 0};
+int slots[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+int player1[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int choice;
 int row, column;
@@ -135,17 +135,17 @@ bool validation(int *player, bool winning_move){
 
 int score(int depth, int* player, int* opponent) {
     if(validation(player, false)){
-        return 10 - depth;
+        return (10 - depth);
     } else if(validation(opponent, false)) {
-        return depth - 10;
+        return (depth - 10);
     }
 
     return 0;
 }
 
-int check_scenario(int i, int depth, int* given_slots, int* player, int* opponent){
-        given_slots[i] = 1;
-        player[i] = 1;
+int check_scenario(int index, int depth, int* given_slots, int* player, int* opponent){
+        given_slots[index] = 1;
+        player[index] = 1;
         int max_score = INT_MIN;
         int temp;
         //bool toggle_turn = true;
@@ -163,6 +163,8 @@ int check_scenario(int i, int depth, int* given_slots, int* player, int* opponen
                             s.insert(temp);
                         }
                     } 
+                    given_slots[i] = 0;
+                    opponent[i] = 0; 
                     cout << "\n TEMPPP: " << temp << "\n";
 
                 }
@@ -170,7 +172,7 @@ int check_scenario(int i, int depth, int* given_slots, int* player, int* opponen
             }
 
             for(auto it : s){
-                if(it >= max_score){
+                if(it > max_score){
                     max_score = it;
                 }
             }
@@ -205,17 +207,17 @@ int scenario(int *current_slots, int *player, int* opponent){
     int position;
     int max_score = INT_MIN;
     int temp;
+    int depth = 0;
     map<int, int> m;
     map<int, int>::iterator iter;
-    int depth = 0;
-    int index = 0;
+ 
     int threshold = (width * width);
-    while(index < threshold){
+    for(int index = 0; index < threshold; index++){
+        
         if(current_slots[index] == 0){
             temp = check_scenario(index, depth, sample_slots, sample_player, sample_opponent);
             m.insert(pair<int, int>(index, temp));
         } 
-        index += 1;
     }
 
 
