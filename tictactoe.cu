@@ -30,7 +30,7 @@ char board[width][width] = {
 };
 
 // int slots[width * width] = {0};
-int slots[width * width] = {1, 0, 0, 1, 0, 0, 0, 1, 0};
+int slots[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 int player1[width * width] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int choice;
@@ -201,15 +201,11 @@ void check_slot(int* given_slots, int* player, char sym){
 
 int scenario(int *current_slots, int *player, int* opponent){
     int sample_slots[width * width];
-    for(int n = 0; n < 9; n++){
-        cout << "SAMPLE SLOT: << sample_slots[n] << ",   ";
-    }
     copy_array(sample_slots, current_slots);
     int sample_player[width * width];
     copy_array(sample_player, player);
     int sample_opponent[width * width];
     copy_array(sample_opponent, opponent);
-
 
     int position;
     int max_score = INT_MIN;
@@ -222,8 +218,8 @@ int scenario(int *current_slots, int *player, int* opponent){
     for(int index = 0; index < threshold; index++){
         
         if(current_slots[index] == 0){
-            // temp = check_scenario(index, depth, sample_slots, sample_player, sample_opponent);
-            // m.insert(pair<int, int>(index, temp));
+            temp = check_scenario(index, depth, sample_slots, sample_player, sample_opponent);
+            m.insert(pair<int, int>(index, temp));
         } 
     }
 
