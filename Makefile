@@ -1,6 +1,6 @@
 IDIR=./
 COMPILER=nvcc
-COMPILER_FLAGS=-I$(IDIR) -I/usr/local/cuda/include -lcuda --std c++17
+COMPILER_FLAGS=-I$(IDIR) -I/C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.7/include -lcuda --std c++17
 
 .PHONY: clean build run
 
